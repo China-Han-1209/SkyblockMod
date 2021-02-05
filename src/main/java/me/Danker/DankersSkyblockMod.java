@@ -13,6 +13,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.gui.inventory.GuiChest;
+import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -67,13 +68,14 @@ import java.awt.*;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Mod(modid = DankersSkyblockMod.MODID, version = DankersSkyblockMod.VERSION, clientSideOnly = true)
 public class DankersSkyblockMod
 {
     public static final String MODID = "Danker's Skyblock Mod";
-    public static final String VERSION = "1.8.4";
+    public static final String VERSION = "1.8.5";
     
     static double checkItemsNow = 0;
     static double itemsChecked = 0;
@@ -131,6 +133,10 @@ public class DankersSkyblockMod
     static int witherDoors = 0;
     static int dungeonDeaths = 0;
     static int puzzleFails = 0;
+	static int cryptCleared = 0;
+	static int secretFound = 0;
+    static int scoreAtLeast = 0;
+	static double completePercentage = 0;
     
     static String lastSkill = "Farming";
     public static boolean showSkillTracker;
@@ -219,7 +225,7 @@ public class DankersSkyblockMod
 		triviaSolutions.put("What is the status of Goldor?", new String[]{"Wither Soldier"});
 		triviaSolutions.put("What is the status of Storm?", new String[]{"Elementalist"});
 		triviaSolutions.put("What is the status of Necron?", new String[]{"Wither Lord"});
-		triviaSolutions.put("How many total Fairy Souls are there?", new String[]{"209 Fairy Souls"});
+		triviaSolutions.put("How many total Fairy Souls are there?", new String[]{"220 Fairy Souls"});
 		triviaSolutions.put("How many Fairy Souls are there in Spider's Den?", new String[]{"17 Fairy Souls"});
 		triviaSolutions.put("How many Fairy Souls are there in The End?", new String[]{"12 Fairy Souls"});
 		triviaSolutions.put("How many Fairy Souls are there in The Barn?", new String[]{"7 Fairy Souls"});
@@ -238,7 +244,7 @@ public class DankersSkyblockMod
 		triviaSolutions.put("What is the name of the person that upgrades pets?", new String[]{"Kat"});
 		triviaSolutions.put("What is the name of the lady of the Nether?", new String[]{"Elle"});
 		triviaSolutions.put("Which villager in the Village gives you a Rogue Sword?", new String[]{"Jamie"});
-		triviaSolutions.put("How many unique minions are there?", new String[]{"52 Minions"});
+		triviaSolutions.put("How many unique minions are there?", new String[]{"53 Minions"});
 		triviaSolutions.put("Which of these enemies does not spawn in the Spider's Den?", new String[]{"Zombie Spider", "Cave Spider", "Wither Skeleton",
 																									   "Dashing Spooder", "Broodfather", "Night Spider"});
 		triviaSolutions.put("Which of these monsters only spawns at night?", new String[]{"Zombie Villager", "Ghast"});
@@ -1180,11 +1186,91 @@ public class DankersSkyblockMod
     	if (event.type != null) return;
     	renderEverything();
     }
+
+    public String getRanking(){
+    	return scoreAtLeast < 100 ? EnumChatFormatting.RED + "D"
+				: scoreAtLeast < 160 ? EnumChatFormatting.BLUE + "C"
+				: scoreAtLeast < 230 ? EnumChatFormatting.GREEN + "B"
+				: scoreAtLeast < 270 ? EnumChatFormatting.LIGHT_PURPLE + "A"
+				: scoreAtLeast < 300 ? EnumChatFormatting.GOLD + "S"
+				: EnumChatFormatting.GOLD + "S+";
+	}
     
     public void renderEverything() {
     	if (Minecraft.getMinecraft().currentScreen instanceof EditLocationsGui) return;
     	
     	Minecraft mc = Minecraft.getMinecraft();
+
+    	if(Utils.inDungeons) {
+			Collection<NetworkPlayerInfo> players = mc.getNetHandler().getPlayerInfoMap();
+			int mins = 0;
+			int secrets = 40;
+			for (NetworkPlayerInfo playerInfo : players) {
+				if (playerInfo == null || playerInfo.getDisplayName() == null) {
+					continue;
+				}
+				String var1 = playerInfo.getDisplayName().getFormattedText().replace("§", "&");
+				String var2 = playerInfo.getDisplayName().getUnformattedText();
+				if (var2.contains("Secrets Found")) {
+					String regEx = "[^0-9]";
+					Pattern p = Pattern.compile(regEx);
+					Matcher m = p.matcher(var2);
+					secretFound = Integer.parseInt(m.replaceAll("").trim());
+				} else if (var2.contains("Crypts")) {
+					String regEx = "[^0-9]";
+					Pattern p = Pattern.compile(regEx);
+					Matcher m = p.matcher(var2);
+					cryptCleared = Integer.parseInt(m.replaceAll("").trim());
+				} else if (var1.contains("&r Time: &r&6")) {
+					String s = var1.replace("&r Time: &r&6", "");
+					String[] args = s.split(" ");
+					String regEx = "[^0-9]";
+					Pattern p = Pattern.compile(regEx);
+					Matcher m = p.matcher(args[0]);
+					String str = m.replaceAll("").trim();
+					try {
+						mins = Integer.parseInt(str.startsWith("0") ? str : str.substring(1));
+					} catch (StringIndexOutOfBoundsException ignored) {
+					}
+				}
+			}
+			for (String s : ScoreboardHandler.getSidebarLines()) {
+				if (s == null) {
+					continue;
+				}
+				String var1 = s.replace("§", "&");
+				if (s.contains("F1")) {
+					secrets = 25;
+				} else if (s.contains("F2")) {
+					secrets = 27;
+				} else if (s.contains("F3")) {
+					secrets = 30;
+				} else if (s.contains("F4")) {
+					secrets = 35;
+				} else if (s.contains("F5")) {
+					secrets = 40;
+				} else if (s.contains("F6")) {
+					secrets = 45;
+				} else if (s.contains("F7")) {
+					secrets = 50;
+				} else if (s.contains("Dungeon Cleared")) {
+					String regEx = "[^0-9]";
+					Pattern p = Pattern.compile(regEx);
+					Matcher m = p.matcher(var1.replace("&6", ""));
+					double d = Integer.parseInt(m.replaceAll("").trim());
+					completePercentage = d / 100;
+				}
+			}
+			int skill = 100 - (dungeonDeaths * 2) - (puzzleFails * 14);
+			if(completePercentage < 1){
+				skill *= 0.8;
+			}
+			double explore = (60.0 * completePercentage) + Math.min(40, 40.0 * secretFound / secrets);
+			int timeModifer = Math.max(mins - 20, 0);
+			double speed = 100 - (2.2 * timeModifer);
+			int bonus = Math.min(cryptCleared, 5);
+			scoreAtLeast = (int) (skill + explore + speed + bonus);
+		}
     	
     	if (ToggleCommand.coordsToggled) {
     		EntityPlayer player = mc.thePlayer;
@@ -1200,17 +1286,26 @@ public class DankersSkyblockMod
     	
     	if (ToggleCommand.dungeonTimerToggled && Utils.inDungeons) {
     		String dungeonTimerText = EnumChatFormatting.GRAY + "Wither Doors:\n" +
-    								  EnumChatFormatting.DARK_RED + "Blood Open:\n" +
+    								  EnumChatFormatting.RED + "Blood Open:\n" +
     								  EnumChatFormatting.RED + "Watcher Clear:\n" +
     								  EnumChatFormatting.BLUE + "Boss Clear:\n" +
     								  EnumChatFormatting.YELLOW + "Deaths:\n" +
-    								  EnumChatFormatting.YELLOW + "Puzzle Fails:";
-    		String dungeonTimers = EnumChatFormatting.GRAY + "" + witherDoors + "\n" +
-								   EnumChatFormatting.DARK_RED + Utils.getTimeBetween(dungeonStartTime, bloodOpenTime) + "\n" +
+    								  EnumChatFormatting.YELLOW + "Puzzle Fails:\n" +
+			                          EnumChatFormatting.GREEN + "Win Score:\n" +
+					                  EnumChatFormatting.GOLD + "Ranking:\n" +
+					                  EnumChatFormatting.AQUA + "Secrets:\n" +
+			                          EnumChatFormatting.GRAY + "Crypts:\n";
+
+			String dungeonTimers = EnumChatFormatting.GRAY + "" + witherDoors + "\n" +
+								   EnumChatFormatting.RED + Utils.getTimeBetween(dungeonStartTime, bloodOpenTime) + "\n" +
 								   EnumChatFormatting.RED + Utils.getTimeBetween(dungeonStartTime, watcherClearTime) + "\n" +
 								   EnumChatFormatting.BLUE + Utils.getTimeBetween(dungeonStartTime, bossClearTime) + "\n" +
 								   EnumChatFormatting.YELLOW + dungeonDeaths + "\n" +
-								   EnumChatFormatting.YELLOW + puzzleFails;
+								   EnumChatFormatting.YELLOW + puzzleFails + "\n" +
+							       EnumChatFormatting.AQUA + secretFound + "\n" +
+					               EnumChatFormatting.GRAY + cryptCleared + "\n" +
+			                       EnumChatFormatting.GREEN + scoreAtLeast + "\n" +
+					               EnumChatFormatting.GOLD + getRanking();
     		new TextRenderer(mc, dungeonTimerText, MoveCommand.dungeonTimerXY[0], MoveCommand.dungeonTimerXY[1], ScaleCommand.dungeonTimerScale);
     		new TextRenderer(mc, dungeonTimers, (int) (MoveCommand.dungeonTimerXY[0] + (80 * ScaleCommand.dungeonTimerScale)), MoveCommand.dungeonTimerXY[1], ScaleCommand.dungeonTimerScale);
     	}

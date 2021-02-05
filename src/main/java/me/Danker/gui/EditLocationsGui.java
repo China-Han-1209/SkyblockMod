@@ -64,13 +64,21 @@ public class EditLocationsGui extends GuiScreen {
 								  EnumChatFormatting.RED + "Watcher Clear:\n" +
 								  EnumChatFormatting.BLUE + "Boss Clear:\n" +
 								  EnumChatFormatting.YELLOW + "Deaths:\n" +
-								  EnumChatFormatting.YELLOW + "Puzzle Fails:";
+								  EnumChatFormatting.YELLOW + "Puzzle Fails:\n" +
+								  EnumChatFormatting.AQUA + "Secrets:\n" +
+								  EnumChatFormatting.GRAY + "Crypts:\n" +
+		                          EnumChatFormatting.GREEN + "Win Score:\n" +
+				                  EnumChatFormatting.GOLD + "Ranking:";
 		String dungeonTimerNums = EnumChatFormatting.GRAY + "" + 5 + "\n" +
 							      EnumChatFormatting.DARK_RED + Utils.getTimeBetween(0, 33) + "\n" +
 							      EnumChatFormatting.RED + Utils.getTimeBetween(0, 129) + "\n" +
 							      EnumChatFormatting.BLUE + Utils.getTimeBetween(0, 169) + "\n" +
 							      EnumChatFormatting.YELLOW + 2 + "\n" +
-							      EnumChatFormatting.YELLOW + 1;
+							      EnumChatFormatting.YELLOW + 1 + "\n" +
+				                  EnumChatFormatting.AQUA + 50 + "\n" +
+				                  EnumChatFormatting.GRAY + 5 + "\n" +
+							      EnumChatFormatting.GREEN + 280 + "\n" +
+							      EnumChatFormatting.GOLD + "S";
 		
 		String skillTrackerText = DankersSkyblockMod.SKILL_TRACKER_COLOUR + "Farming XP Earned: 462,425.3\n" +
 								  DankersSkyblockMod.SKILL_TRACKER_COLOUR + "Time Elapsed: " + Utils.getTimeBetween(0, 3602) + "\n" +
