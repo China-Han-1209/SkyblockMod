@@ -1264,6 +1264,7 @@ public class DankersSkyblockMod
 			int skill = 100 - (dungeonDeaths * 2) - (puzzleFails * 14);
 			if(completePercentage < 1){
 				skill *= 0.8;
+				skill *= completePercentage;
 			}
 			double explore = (60.0 * completePercentage) + Math.min(40, 40.0 * secretFound / secrets);
 			int timeModifer = Math.max(mins - 20, 0);
@@ -1291,10 +1292,11 @@ public class DankersSkyblockMod
     								  EnumChatFormatting.BLUE + "Boss Clear:\n" +
     								  EnumChatFormatting.YELLOW + "Deaths:\n" +
     								  EnumChatFormatting.YELLOW + "Puzzle Fails:\n" +
-			                          EnumChatFormatting.GREEN + "Win Score:\n" +
-					                  EnumChatFormatting.GOLD + "Ranking:\n" +
 					                  EnumChatFormatting.AQUA + "Secrets:\n" +
-			                          EnumChatFormatting.GRAY + "Crypts:\n";
+					                  EnumChatFormatting.GRAY + "Crypts:\n" +
+			                          EnumChatFormatting.GREEN + "Win Score:\n" +
+					                  EnumChatFormatting.GOLD + "Ranking:"
+					                  ;
 
 			String dungeonTimers = EnumChatFormatting.GRAY + "" + witherDoors + "\n" +
 								   EnumChatFormatting.RED + Utils.getTimeBetween(dungeonStartTime, bloodOpenTime) + "\n" +
